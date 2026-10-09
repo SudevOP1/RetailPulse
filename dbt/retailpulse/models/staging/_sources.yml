@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: olist
+    description: Olist CSVs loaded as text by scripts/load_raw.ps1 (ELT landing zone).
+    schema: raw
+    tables:
+      - name: orders
+        description: One row per order (99,441).
+        columns:
+          - name: order_id
+            data_tests: [unique, not_null]
+      - name: customers
+        description: One row per order-level customer_id; customer_unique_id is the person.
+      - name: order_items
+        description: One row per item within an order.
+      - name: order_payments
+        description: One row per payment instalment record (orders can split payment types).
+      - name: order_reviews
+        description: Customer reviews. Contains duplicate review_id rows (data_quality_log #7).
+      - name: products
+        description: Product catalogue with misspelled *_lenght columns.
+      - name: sellers
+        description: One row per seller.
+      - name: geolocation
+        description: ~1M lat/lng points keyed by zip prefix (many per prefix).
+      - name: product_category_name_translation
+        description: Portuguese → English category names (71 rows, 2 missing).

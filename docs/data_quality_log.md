@@ -50,3 +50,13 @@ Numbers come from `notebooks/01_eda.ipynb` §8 (raw data as loaded, 2026-10-08) 
 |---|---|---|---|---|---|
 | 25 | orders | Purchases run 2016-09-04 → 2018-10-17; Sep–Dec 2016 sparse (329 orders, **0** in Nov 2016), Sep–Oct 2018 truncated (20 orders) | orders-per-month chart | **keep** all rows in tables; **filter** trend charts and monthly KPIs to Jan 2017 – Aug 2018 | Phase 3 / 5 |
 | 26 | orders | Delivery estimates are heavily padded: median actual 10.2 d vs promised 23.2 d, yet 6.77% (6,534 / 96,470) arrive late | delivery histogram | **flag**: context for the late-delivery analysis and memo; late = `delivered::date > estimated::date` | Phase 4 / 6 |
+
+## Found / verified in Phase 2 (dbt build, 2026-10-09)
+
+| # | Table | Quirk | Evidence | Decision | Implemented in |
+|---|---|---|---|---|---|
+| 27 | order_reviews | Test #15 (`unique` on `stg_olist__reviews.review_id`, warn) fires as designed | 789 failing values stored in `dbt_test__audit.dup_review_ids`; `sum(n_records) - count(*)` = **814** extra rows | **flag** confirmed; (review_id, order_id) pairs are unique, so each duplicate is one review linked to several orders. `int_order_reviews_latest` leaves 98,673 orders with exactly one review | Phase 2 |
+| 28 | geolocation | 5 zip prefixes (16 points) lie entirely outside Brazil's bounding box and vanish after #11's filter | 19,015 → 19,010 prefixes in `int_zip_geolocation` | **keep**: affected customers/sellers get null lat/lng | Phase 2 |
+| 29 | customers, sellers | Zip prefix with no geolocation at all | 269 of 96,096 customers, 7 of 3,095 sellers have null lat/lng | **keep** null; maps in Power BI fall back to state | Phase 2 |
+| 30 | order_payments | Payment ≠ items + freight by more than R$1 on orders with items | 250 orders (0.25%; 247 delivered, mean +R$10.9 — instalment interest) stored in `dbt_test__audit.assert_payments_match_items` | **flag**: singular test warns above 0, errors only at ≥ 1% (994 orders). GMV uses item price, not payments | Phase 2 (test #30) |
+| 31 | products | 2 untranslated categories | `not_null` on `dim_product.category_en` passes only because of the patch seed (a non-null category without a translation stays null by design) | **fix** confirmed: 73 English categories + `unknown` (610 products) | Phase 2 (test #27) |

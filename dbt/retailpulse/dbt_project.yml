@@ -14,11 +14,31 @@ target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
 # Layering (PLAN.md §8 Phase 2): staging/intermediate are views, marts are tables.
+# Schema names are used verbatim (macros/generate_schema_name.sql).
 models:
   retailpulse:
     staging:
       +materialized: view
+      +schema: staging
     intermediate:
       +materialized: view
+      +schema: intermediate
     marts:
       +materialized: table
+      +schema: marts
+
+seeds:
+  retailpulse:
+    +schema: staging
+    state_region:
+      +column_types:
+        state: text
+        region: text
+    category_translation_patch:
+      +column_types:
+        product_category_name: text
+        product_category_name_english: text
+
+data_tests:
+  retailpulse:
+    +schema: dbt_test__audit

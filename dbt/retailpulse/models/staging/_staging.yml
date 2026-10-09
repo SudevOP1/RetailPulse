@@ -1,0 +1,110 @@
+version: 2
+
+models:
+  - name: stg_olist__orders
+    description: Orders, typed. One row per order; timestamps cast, status lowercased.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: order_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [delivered, shipped, canceled, unavailable, invoiced, processing, created, approved]
+
+  - name: stg_olist__customers
+    description: One row per order-level customer_id. Zip prefix kept as text.
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]
+      - name: customer_unique_id
+        data_tests: [not_null]
+
+  - name: stg_olist__order_items
+    description: One row per item (order_id, order_item_id); price and freight as numeric(10,2).
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [order_id, order_item_id]
+    columns:
+      - name: price
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: freight_value
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: product_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_olist__products')
+                field: product_id
+      - name: seller_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_olist__sellers')
+                field: seller_id
+
+  - name: stg_olist__payments
+    description: One row per payment record (order_id, payment_sequential).
+    columns:
+      - name: payment_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [credit_card, boleto, voucher, debit_card, not_defined]
+
+  - name: stg_olist__reviews
+    description: >
+      Reviews, typed. Duplicate review_id rows are deliberately kept so the warn-level
+      unique test flags them; int_order_reviews_latest picks one review per order.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [review_id, order_id]
+    columns:
+      - name: review_id
+        description: >
+          NOT unique in the source: 814 extra rows across 789 review_ids (one review attached
+          to several orders). The unique test warns and stores the 789 duplicated values in
+          dbt_test__audit.dup_review_ids.
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+                store_failures: true
+                alias: dup_review_ids
+      - name: review_score
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+
+  - name: stg_olist__products
+    description: >
+      Products with source misspellings fixed (*_lenght -> *_length) and categories
+      translated via the source table plus the category_translation_patch seed.
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+
+  - name: stg_olist__sellers
+    description: One row per seller. Zip prefix kept as text.
+    columns:
+      - name: seller_id
+        data_tests: [unique, not_null]
+
+  - name: stg_olist__geolocation
+    description: Raw geolocation points, typed. Aggregate via int_zip_geolocation before joining.
+
+  - name: stg_olist__category_translation
+    description: Olist's Portuguese → English category names (71 rows; 2 missing, patched by seed).
+    columns:
+      - name: category_pt
+        data_tests: [unique, not_null]

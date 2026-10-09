@@ -1,0 +1,226 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: Calendar dimension, one row per day 2016-09-01 → 2018-12-31. Mark as the date table in Power BI.
+    columns:
+      - name: date_key
+        description: Surrogate key, yyyymmdd as integer (e.g. 20180315). Joins fact *_date_key columns.
+        data_tests: [unique, not_null]
+      - name: date_day
+        description: Calendar date.
+      - name: year
+        description: Calendar year.
+      - name: quarter
+        description: Calendar quarter (1–4).
+      - name: month
+        description: Month number (1–12).
+      - name: month_name
+        description: Month name in English (January …).
+      - name: year_month
+        description: "'YYYY-MM' label for monthly trends (trend window Jan 2017 – Aug 2018)."
+      - name: month_start
+        description: First day of the month, for monthly grouping as a real date.
+      - name: iso_week
+        description: ISO week number.
+      - name: iso_weekday
+        description: ISO weekday number (1 = Monday … 7 = Sunday).
+      - name: weekday_name
+        description: Weekday name in English.
+      - name: is_weekend
+        description: True on Saturday and Sunday.
+
+  - name: dim_customer
+    description: >
+      One row per real customer (customer_unique_id, 96,096 rows). Olist's customer_id is
+      per order, so it is not used as the customer key. Location fields come from the
+      customer's most recent order.
+    columns:
+      - name: customer_key
+        description: customer_unique_id — the person. "Customer" means this key everywhere.
+        data_tests: [unique, not_null]
+      - name: zip_prefix
+        description: 5-character zip prefix (text; leading zeros kept).
+      - name: city
+        description: Customer city (lowercase).
+      - name: state
+        description: Two-letter UF code.
+      - name: region
+        description: IBGE region from the state_region seed.
+        data_tests: [not_null]
+      - name: lat
+        description: Mean latitude of the zip prefix (null if the prefix has no geolocation).
+      - name: lng
+        description: Mean longitude of the zip prefix.
+      - name: first_order_date
+        description: Date of the customer's first order (any status). Cohort month source.
+      - name: last_order_date
+        description: Date of the customer's most recent order (any status).
+      - name: orders_count
+        description: Orders placed (any status).
+      - name: delivered_orders_count
+        description: Orders with status 'delivered'. ≥ 2 means a repeat customer.
+
+  - name: dim_seller
+    description: One row per seller (3,095).
+    columns:
+      - name: seller_key
+        description: Olist seller_id.
+        data_tests: [unique, not_null]
+      - name: zip_prefix
+        description: 5-character zip prefix (text).
+      - name: city
+        description: Seller city (lowercase).
+      - name: state
+        description: Two-letter UF code.
+      - name: region
+        description: IBGE region from the state_region seed.
+      - name: lat
+        description: Mean latitude of the zip prefix.
+      - name: lng
+        description: Mean longitude of the zip prefix.
+      - name: first_sale_date
+        description: Purchase date of the seller's first order item (null if never sold).
+
+  - name: dim_product
+    description: One row per product (32,951) with Portuguese and English category.
+    columns:
+      - name: product_key
+        description: Olist product_id.
+        data_tests: [unique, not_null]
+      - name: category_pt
+        description: Portuguese category name; 'unknown' for the 610 products with no category.
+      - name: category_en
+        description: >
+          English category from Olist's translation table plus the category_translation_patch
+          seed; 'unknown' when the product has no category. The not_null test fails without
+          the patch (pc_gamer, portateis_cozinha_e_preparadores_de_alimentos) and passes with it.
+        data_tests: [not_null]
+      - name: weight_g
+        description: Product weight in grams (null for 2 products).
+      - name: volume_cm3
+        description: length × height × width in cm³ (null for 2 products).
+      - name: photos_qty
+        description: Number of listing photos.
+      - name: name_length
+        description: Characters in the product name (source column product_name_lenght, sic).
+      - name: description_length
+        description: Characters in the description (source column product_description_lenght, sic).
+
+  - name: fact_orders
+    description: >
+      Order-grain fact, one row per order (99,441). Late = delivered date > estimated date
+      (date level) for status 'delivered' with a delivered date; null otherwise. Review =
+      latest review per order.
+    columns:
+      - name: order_id
+        description: Olist order_id (primary key).
+        data_tests: [unique, not_null]
+      - name: customer_key
+        description: FK → dim_customer (customer_unique_id).
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_key
+      - name: purchase_date_key
+        description: FK → dim_date (yyyymmdd of purchased_at).
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
+      - name: order_status
+        description: Lowercase order status (8 values).
+      - name: purchased_at
+        description: Purchase timestamp.
+      - name: approved_at
+        description: Payment approval timestamp (null for 160 orders).
+      - name: delivered_carrier_at
+        description: Handover to carrier.
+      - name: delivered_customer_at
+        description: Delivery to customer.
+      - name: estimated_delivery_at
+        description: Delivery date promised at purchase.
+      - name: items_count
+        description: Number of items (0 for the 775 orders without items).
+      - name: sellers_count
+        description: Distinct sellers in the order.
+      - name: items_value
+        description: Sum of item price, R$ (GMV contribution; excludes freight).
+      - name: freight_value
+        description: Sum of item freight, R$.
+      - name: order_value
+        description: items_value + freight_value, R$.
+      - name: payment_value
+        description: Sum of payments, R$ (null for the 1 order without a payment).
+      - name: payment_type_primary
+        description: Payment type carrying the largest value in the order.
+      - name: max_installments
+        description: Largest instalment count among the order's payments.
+      - name: is_delivered
+        description: order_status = 'delivered'.
+      - name: delivery_days
+        description: Days from purchase to delivery (fractional); null unless delivered with a date.
+      - name: promised_days
+        description: Days from purchase to estimated delivery (fractional).
+      - name: days_late
+        description: delivered date − estimated date in whole days (negative = early); null unless delivered with a date.
+      - name: is_late
+        description: days_late > 0; null when not delivered or no delivered date.
+      - name: review_score
+        description: Score (1–5) of the latest review; null for orders without a review.
+      - name: is_one_star
+        description: review_score = 1; null when no review.
+      - name: has_review_comment
+        description: Latest review has a comment message.
+      - name: customer_state
+        description: Customer UF on this order.
+      - name: customer_region
+        description: IBGE region of customer_state.
+
+  - name: fact_order_items
+    description: Item-grain fact, one row per order item (112,650).
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [order_id, order_item_id]
+    columns:
+      - name: order_id
+        description: FK → fact_orders.order_id (degenerate dimension).
+      - name: order_item_id
+        description: Item sequence within the order (1…21).
+      - name: product_key
+        description: FK → dim_product.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: product_key
+      - name: seller_key
+        description: FK → dim_seller.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_seller')
+                field: seller_key
+      - name: customer_key
+        description: FK → dim_customer.
+      - name: purchase_date_key
+        description: FK → dim_date.
+      - name: price
+        description: Item price, R$ (GMV = sum of this, no freight).
+      - name: freight_value
+        description: Item freight, R$.
+      - name: shipping_limit_at
+        description: Seller's shipping deadline (4 items have 2020 dates; unused).
+      - name: order_status
+        description: Status of the parent order.
+      - name: is_delivered
+        description: Parent order delivered.
+      - name: is_late
+        description: Parent order late (same definition as fact_orders).
+      - name: review_score
+        description: Latest review score of the parent order.

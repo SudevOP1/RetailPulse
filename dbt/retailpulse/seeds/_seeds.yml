@@ -1,0 +1,27 @@
+version: 2
+
+seeds:
+  - name: state_region
+    description: The 27 Brazilian federative units (UFs) mapped to Brazil's 5 IBGE regions.
+    columns:
+      - name: state
+        description: Two-letter UF code (e.g. SP).
+        data_tests: [unique, not_null]
+      - name: state_name
+        description: Full state name.
+      - name: region
+        description: IBGE macro-region (North, Northeast, Center-West, Southeast, South).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [North, Northeast, Center-West, Southeast, South]
+
+  - name: category_translation_patch
+    description: >
+      English names for the 2 Portuguese categories missing from Olist's translation file
+      (data_quality_log #14). Unioned into stg_olist__category_translation.
+    columns:
+      - name: product_category_name
+        data_tests: [unique, not_null]
+      - name: product_category_name_english
+        data_tests: [not_null]

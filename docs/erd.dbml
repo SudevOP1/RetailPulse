@@ -1,0 +1,104 @@
+// RetailPulse core star schema (schema `marts`). Paste into https://dbdiagram.io → export PNG to docs/erd.png.
+// Grain: fact_orders = 1 row/order (99,441); fact_order_items = 1 row/item (112,650).
+// No fact-to-fact relationship in the BI model; order_id on fact_order_items is a degenerate dimension.
+
+Table dim_date {
+  date_key int [pk, note: 'yyyymmdd']
+  date_day date
+  year int
+  quarter int
+  month int
+  month_name text
+  year_month text
+  month_start date
+  iso_week int
+  iso_weekday int
+  weekday_name text
+  is_weekend boolean
+}
+
+Table dim_customer {
+  customer_key text [pk, note: 'customer_unique_id']
+  zip_prefix text
+  city text
+  state text
+  region text
+  lat float
+  lng float
+  first_order_date date
+  last_order_date date
+  orders_count int
+  delivered_orders_count int
+}
+
+Table dim_seller {
+  seller_key text [pk, note: 'seller_id']
+  zip_prefix text
+  city text
+  state text
+  region text
+  lat float
+  lng float
+  first_sale_date date
+}
+
+Table dim_product {
+  product_key text [pk, note: 'product_id']
+  category_pt text
+  category_en text
+  weight_g int
+  volume_cm3 int
+  photos_qty int
+  name_length int
+  description_length int
+}
+
+Table fact_orders {
+  order_id text [pk]
+  customer_key text [ref: > dim_customer.customer_key]
+  purchase_date_key int [ref: > dim_date.date_key]
+  order_status text
+  purchased_at timestamp
+  approved_at timestamp
+  delivered_carrier_at timestamp
+  delivered_customer_at timestamp
+  estimated_delivery_at timestamp
+  items_count int
+  sellers_count int
+  items_value numeric
+  freight_value numeric
+  order_value numeric
+  payment_value numeric
+  payment_type_primary text
+  max_installments int
+  is_delivered boolean
+  delivery_days numeric
+  promised_days numeric
+  days_late int
+  is_late boolean
+  review_score int
+  is_one_star boolean
+  has_review_comment boolean
+  customer_state text
+  customer_region text
+}
+
+Table fact_order_items {
+  order_id text
+  order_item_id int
+  product_key text [ref: > dim_product.product_key]
+  seller_key text [ref: > dim_seller.seller_key]
+  customer_key text [ref: > dim_customer.customer_key]
+  purchase_date_key int [ref: > dim_date.date_key]
+  price numeric
+  freight_value numeric
+  shipping_limit_at timestamp
+  order_status text
+  is_delivered boolean
+  is_late boolean
+  review_score int
+
+  indexes {
+    (order_id, order_item_id) [pk]
+  }
+}

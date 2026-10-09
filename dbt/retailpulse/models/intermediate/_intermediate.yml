@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: int_order_items_agg
+    description: Item-level measures rolled up to one row per order.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+
+  - name: int_order_payments_agg
+    description: Payments rolled up to one row per order; primary type = largest payment value.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+
+  - name: int_order_reviews_latest
+    description: Latest review per order (row_number over review_answered_at desc).
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+
+  - name: int_zip_geolocation
+    description: Mean lat/lng per zip prefix, Brazil bounding box only.
+    columns:
+      - name: zip_prefix
+        data_tests: [unique, not_null]
