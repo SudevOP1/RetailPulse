@@ -23,3 +23,6 @@ logs/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Large export (regenerate with scripts/export_marts.py)
+exports/rfm_segments.csv

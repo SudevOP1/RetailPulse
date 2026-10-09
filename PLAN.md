@@ -15,8 +15,8 @@ E-commerce analytics from end to end on the Olist Brazilian marketplace data: wa
 | Phase | Name                                         | Resume bullet served | Status                                                | Done on    |
 | ----- | -------------------------------------------- | -------------------- | ----------------------------------------------------- | ---------- |
 | 1     | Setup, ingest, profile                       | 1                    | Done                                                  | 2026-10-09 |
-| 2     | dbt star schema + 25+ data-quality tests     | 1                    | Done (lineage PNG + ERD PNG pending: user)            | 2026-10-09 |
-| 3     | SQL analytics marts                          | 3                    | Not started                                           | –          |
+| 2     | dbt star schema + 25+ data-quality tests     | 1                    | Done                                                  | 2026-10-09 |
+| 3     | SQL analytics marts                          | 3                    | Done                                                  | 2026-10-09 |
 | 4     | Statistics: late delivery + A/B sizing       | 2                    | Not started                                           | –          |
 | 5     | Power BI dashboard + Excel scorecard         | 4                    | Not started                                           | –          |
 | 6     | KPI dictionary, insight memo, README, polish | 4                    | Not started                                           | –          |

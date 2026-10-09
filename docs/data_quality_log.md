@@ -60,3 +60,12 @@ Numbers come from `notebooks/01_eda.ipynb` §8 (raw data as loaded, 2026-10-08) 
 | 29 | customers, sellers | Zip prefix with no geolocation at all | 269 of 96,096 customers, 7 of 3,095 sellers have null lat/lng | **keep** null; maps in Power BI fall back to state | Phase 2 |
 | 30 | order_payments | Payment ≠ items + freight by more than R$1 on orders with items | 250 orders (0.25%; 247 delivered, mean +R$10.9 — instalment interest) stored in `dbt_test__audit.assert_payments_match_items` | **flag**: singular test warns above 0, errors only at ≥ 1% (994 orders). GMV uses item price, not payments | Phase 2 (test #30) |
 | 31 | products | 2 untranslated categories | `not_null` on `dim_product.category_en` passes only because of the patch seed (a non-null category without a translation stays null by design) | **fix** confirmed: 73 English categories + `unknown` (610 products) | Phase 2 (test #27) |
+
+## Found / decided in Phase 3 (analytics marts, 2026-10-09)
+
+| # | Table | Quirk | Evidence | Decision | Implemented in |
+|---|---|---|---|---|---|
+| 32 | orders | 8 `delivered` orders without a delivered date (#16) shift the repeat-rate denominator | 93,358 customers with a delivered order vs 93,350 with a dated delivery | **keep** in repeat rate (status-based, 2,801 / 93,358 = 3.00%); excluded only from late metrics | Phase 3 (`kpi_summary`) |
+| 33 | products | `unknown` category (#13) holds R$170,727 of delivered GMV, which would rank 20th of 74 | `category_pareto` with and without it | **exclude** from the Pareto: 17 of 73 (18 of 74 if kept); KPI dictionary records it | Phase 3 (`category_pareto`) |
+| 34 | orders / customers | 97.0% of customers have one delivered order | 2,801 repeat of 93,358 | **flag**: RFM frequency is a ≥ 2 flag, not `NTILE(5)` | Phase 3 (`rfm_segments`) |
+| 35 | exports | `rfm_segments.csv` is 7.5 MB (93,358 rows) | file size | **gitignore** that one export; regenerate with `scripts/export_marts.py`. The other 6 analytics CSVs (< 100 KB) are committed | Phase 3 |

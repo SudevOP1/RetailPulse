@@ -1,0 +1,277 @@
+version: 2
+
+# Analytics marts (PLAN.md §8 Phase 3). Built on the core star schema only.
+# GMV everywhere = sum of item price on delivered orders, no freight (docs/kpi_definitions.md).
+
+models:
+  - name: kpi_monthly
+    description: >
+      Monthly KPIs by purchase month for the trend window Jan 2017 – Aug 2018 (20 rows).
+      orders counts every order placed; GMV, AOV, customers, freight and review metrics use
+      delivered orders; on_time_rate uses delivered orders with a delivered date.
+    columns:
+      - name: year_month
+        description: "'YYYY-MM' purchase month."
+        data_tests: [unique, not_null]
+      - name: month_start
+        description: First day of the purchase month.
+        data_tests: [unique, not_null]
+      - name: orders
+        description: Orders placed in the month (any status).
+        data_tests: [not_null]
+      - name: delivered_orders
+        description: Orders placed in the month that reached status delivered.
+      - name: gmv
+        description: Item GMV (sum of item price, no freight) of delivered orders, R$.
+        data_tests: [not_null]
+      - name: aov
+        description: gmv / delivered_orders, R$.
+      - name: customers
+        description: Distinct customer_unique_id with a delivered order in the month.
+      - name: on_time_rate
+        description: Share of delivered orders (with a delivered date) that arrived on or before the estimated date.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: avg_review
+        description: Mean latest review score of delivered orders.
+      - name: one_star_rate
+        description: Share of reviewed delivered orders whose latest review is 1 star.
+      - name: freight_share
+        description: freight / (gmv + freight) for delivered orders.
+      - name: gmv_mom
+        description: GMV month-over-month growth, gmv / lag(gmv) - 1. Null for Jan 2017.
+      - name: orders_yoy
+        description: Orders vs the same month a year earlier, lag(orders, 12). Null before Jan 2018.
+
+  - name: kpi_summary
+    description: One-row headline KPIs over the full dataset, including the repeat-purchase rate.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "repeat_customers < customers"
+    columns:
+      - name: orders
+        description: All orders (99,441).
+      - name: delivered_orders
+        description: Orders with status delivered.
+      - name: gmv
+        description: Item GMV of delivered orders, R$.
+      - name: aov
+        description: gmv / delivered_orders, R$.
+      - name: freight_share
+        description: freight / (gmv + freight), delivered orders.
+      - name: customers
+        description: customer_unique_id with >= 1 delivered order (repeat-rate denominator).
+      - name: repeat_customers
+        description: customer_unique_id with >= 2 delivered orders.
+      - name: repeat_purchase_rate
+        description: repeat_customers / customers.
+        data_tests: [not_null]
+      - name: late_orders
+        description: Delivered orders with delivered date > estimated date (date level).
+      - name: orders_with_delivery_date
+        description: Delivered orders with a delivered date (late-share denominator).
+      - name: late_share
+        description: late_orders / orders_with_delivery_date.
+      - name: avg_review
+        description: Mean latest review score, delivered orders.
+      - name: one_star_rate
+        description: Share of reviewed delivered orders with a 1-star latest review.
+
+  - name: cohort_retention
+    description: >
+      Monthly acquisition cohorts (long format: one row per cohort_month × month_index).
+      Active = placed a non-canceled, non-unavailable order in the month. Cohorts outside
+      Jan 2017 – Aug 2018 are kept but flagged via in_trend_window.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [cohort_month, month_index]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "active_customers <= cohort_size"
+    columns:
+      - name: cohort_month
+        description: Month of the customer's first non-canceled order.
+        data_tests: [not_null]
+      - name: cohort_year_month
+        description: "'YYYY-MM' label of cohort_month."
+      - name: month_index
+        description: Months since the cohort month (0 = acquisition month).
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: active_customers
+        description: Distinct customers of the cohort active in that month.
+      - name: cohort_size
+        description: Customers in the cohort (active_customers at month_index 0), via FIRST_VALUE.
+      - name: retention_pct
+        description: 100 × active_customers / cohort_size.
+      - name: in_trend_window
+        description: True when cohort_month is within Jan 2017 – Aug 2018.
+
+  - name: rfm_segments
+    description: >
+      One row per customer with at least one delivered order. R and M are NTILE(5) scores;
+      frequency is a flag (>= 2 delivered orders) because ~97% of customers bought once.
+    columns:
+      - name: customer_key
+        description: customer_unique_id.
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_key
+      - name: last_order_date
+        description: Purchase date of the customer's latest delivered order.
+      - name: recency_days
+        description: Days from last_order_date to the as-of date (last delivered purchase date + 1).
+      - name: frequency
+        description: Delivered orders.
+      - name: monetary
+        description: Item GMV across delivered orders, R$.
+      - name: r_score
+        description: Recency quintile, 5 = most recent.
+      - name: m_score
+        description: Monetary quintile, 5 = highest spend.
+      - name: f_flag
+        description: True if the customer has >= 2 delivered orders.
+      - name: segment
+        description: Rule-based segment (docs/kpi_definitions.md).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [Champions, Loyal-lapsing, New high-value, New/promising, At-risk high-value, Hibernating]
+
+  - name: category_pareto
+    description: >
+      Category Pareto on delivered item GMV, 73 real categories ('unknown' excluded).
+      abc_class A = categories needed to reach 80% of GMV, B = to 95%, C = rest.
+    columns:
+      - name: category_en
+        description: English category name.
+        data_tests: [unique, not_null]
+      - name: category_pt
+        description: Original Portuguese category name.
+        data_tests: [unique, not_null]
+      - name: items
+        description: Delivered items sold.
+      - name: orders
+        description: Distinct delivered orders containing the category.
+      - name: gmv
+        description: Item GMV, delivered orders, R$.
+      - name: gmv_rank
+        description: RANK() by GMV, 1 = largest.
+      - name: gmv_share
+        description: Category GMV / total GMV.
+      - name: cum_share
+        description: Running GMV share in rank order, SUM() OVER (ORDER BY gmv DESC).
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1.0001
+      - name: abc_class
+        description: A / B / C class (see model description).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [A, B, C]
+
+  - name: seller_scorecard
+    description: >
+      Sellers with >= 20 delivered seller-orders. A seller-order is a (seller, order) pair.
+      tier: C = worst late-rate decile or 1-star rate >= 2x marketplace; A = top-20% GMV
+      (percent rank >= 0.8) with late rate <= median scorecard seller; B = rest.
+    columns:
+      - name: seller_key
+        description: seller_id.
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_seller')
+                field: seller_key
+      - name: seller_state
+        description: Seller UF.
+      - name: seller_region
+        description: Seller IBGE region.
+      - name: orders
+        description: Delivered seller-orders.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 20
+      - name: gmv
+        description: Item GMV of the seller's items on delivered orders, R$.
+      - name: late_orders
+        description: Seller-orders delivered late.
+      - name: orders_with_delivery_date
+        description: Seller-orders with a delivered date (late-rate denominator).
+      - name: late_rate
+        description: late_orders / orders_with_delivery_date.
+      - name: avg_review
+        description: Mean latest review score of the seller's orders.
+      - name: one_star_rate
+        description: Share of the seller's reviewed orders with a 1-star latest review.
+      - name: avg_delivery_days
+        description: Mean purchase-to-delivery days.
+      - name: gmv_percent_rank
+        description: PERCENT_RANK() by GMV among scorecard sellers (1 = largest).
+      - name: late_decile
+        description: NTILE(10) by late rate; 10 = worst.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                quote: false
+      - name: tier
+        description: A / B / C performance tier.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [A, B, C]
+      - name: marketplace_late_rate
+        description: Late rate over all delivered seller-orders (all sellers), for comparison.
+      - name: marketplace_one_star_rate
+        description: 1-star rate over all reviewed delivered seller-orders (all sellers).
+      - name: median_seller_late_rate
+        description: Median late_rate across scorecard sellers (tier A threshold).
+
+  - name: freight_by_state
+    description: Delivery economics by customer state, delivered orders only (27 rows).
+    columns:
+      - name: customer_state
+        description: Customer UF.
+        data_tests: [unique, not_null]
+      - name: customer_region
+        description: IBGE region.
+        data_tests: [not_null]
+      - name: orders
+        description: Delivered orders.
+      - name: gmv
+        description: Item GMV, R$.
+      - name: freight
+        description: Freight charged, R$.
+      - name: freight_share
+        description: freight / (gmv + freight).
+      - name: late_rate
+        description: Late share of delivered orders with a delivered date.
+      - name: avg_delivery_days
+        description: Mean purchase-to-delivery days.
+      - name: avg_promised_days
+        description: Mean purchase-to-estimate days, same orders as avg_delivery_days.
+      - name: avg_review
+        description: Mean latest review score.
