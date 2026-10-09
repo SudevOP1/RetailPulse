@@ -1,0 +1,25 @@
+# Data (licence CC BY-NC-SA 4.0: ship the download script, never the CSVs)
+data/raw/
+
+# Secrets
+.env
+profiles.yml
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# dbt
+dbt/retailpulse/target/
+dbt/retailpulse/dbt_packages/
+dbt/retailpulse/logs/
+logs/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/

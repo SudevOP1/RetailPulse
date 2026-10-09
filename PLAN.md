@@ -12,14 +12,14 @@ E-commerce analytics from end to end on the Olist Brazilian marketplace data: wa
 
 ### Status
 
-| Phase | Name                                         | Resume bullet served | Status      | Done on |
-| ----- | -------------------------------------------- | -------------------- | ----------- | ------- |
-| 1     | Setup, ingest, profile                       | 1                    | Not started | –       |
-| 2     | dbt star schema + 25+ data-quality tests     | 1                    | Not started | –       |
-| 3     | SQL analytics marts                          | 3                    | Not started | –       |
-| 4     | Statistics: late delivery + A/B sizing       | 2                    | Not started | –       |
-| 5     | Power BI dashboard + Excel scorecard         | 4                    | Not started | –       |
-| 6     | KPI dictionary, insight memo, README, polish | 4                    | Not started | –       |
+| Phase | Name                                         | Resume bullet served | Status                                                | Done on    |
+| ----- | -------------------------------------------- | -------------------- | ----------------------------------------------------- | ---------- |
+| 1     | Setup, ingest, profile                       | 1                    | In progress (awaiting Postgres install for DB checks) | 2026-10-08 |
+| 2     | dbt star schema + 25+ data-quality tests     | 1                    | Not started                                           | –          |
+| 3     | SQL analytics marts                          | 3                    | Not started                                           | –          |
+| 4     | Statistics: late delivery + A/B sizing       | 2                    | Not started                                           | –          |
+| 5     | Power BI dashboard + Excel scorecard         | 4                    | Not started                                           | –          |
+| 6     | KPI dictionary, insight memo, README, polish | 4                    | Not started                                           | –          |
 
 Status values: `Not started` → `In progress` → `Done` (or `Blocked: <reason>`). Update this table at the end of every phase, and append a note to `PROGRESS.md`.
 
@@ -40,15 +40,15 @@ RetailPulse turns Olist's raw marketplace export (100K orders across 9 relationa
 
 ## 2. Why it matters for DA / BA / DS hiring
 
-| What current JDs ask for                                       | Where RetailPulse proves it                                                                                                                       |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SQL: joins, CTEs, window functions                             | `marts/analytics/*.sql`: cohort (`MIN() OVER`), Pareto (`SUM() OVER (ORDER BY …)`), RFM (`NTILE`), MoM (`LAG`), seller ranks (`PERCENT_RANK`)     |
-| Power BI + DAX, data modeling                                  | Star schema imported into Power BI, 15 named DAX measures, drill-through page, marked date table                                                  |
-| Excel (Power Query, PivotTables, XLOOKUP)                      | `excel/seller_scorecard.xlsx`                                                                                                                     |
-| Statistics, hypothesis testing, A/B testing                    | `02_late_delivery_stats.ipynb` (z-test, chi-square, Mann–Whitney, logit) and `03_ab_test_design.ipynb` (power analysis, A/A simulation)           |
-| ETL/ELT, data warehousing, data quality                        | Raw → staging → marts in dbt, 30 dbt tests, a data-quality log                                                                                    |
-| KPIs, dashboards, business insights, stakeholder communication | KPI dictionary, 1-page memo, recommendation → experiment design                                                                                   |
-| E-commerce domain (GMV, AOV, conversion, LTV KPIs)             | GMV, AOV, repeat rate, delivery SLA, seller and category economics                                                                                |
+| What current JDs ask for                                       | Where RetailPulse proves it                                                                                                                   |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| SQL: joins, CTEs, window functions                             | `marts/analytics/*.sql`: cohort (`MIN() OVER`), Pareto (`SUM() OVER (ORDER BY …)`), RFM (`NTILE`), MoM (`LAG`), seller ranks (`PERCENT_RANK`) |
+| Power BI + DAX, data modeling                                  | Star schema imported into Power BI, 15 named DAX measures, drill-through page, marked date table                                              |
+| Excel (Power Query, PivotTables, XLOOKUP)                      | `excel/seller_scorecard.xlsx`                                                                                                                 |
+| Statistics, hypothesis testing, A/B testing                    | `02_late_delivery_stats.ipynb` (z-test, chi-square, Mann–Whitney, logit) and `03_ab_test_design.ipynb` (power analysis, A/A simulation)       |
+| ETL/ELT, data warehousing, data quality                        | Raw → staging → marts in dbt, 30 dbt tests, a data-quality log                                                                                |
+| KPIs, dashboards, business insights, stakeholder communication | KPI dictionary, 1-page memo, recommendation → experiment design                                                                               |
+| E-commerce domain (GMV, AOV, conversion, LTV KPIs)             | GMV, AOV, repeat rate, delivery SLA, seller and category economics                                                                            |
 
 The two internships already show engineering rigour. RetailPulse is what proves the **analyst** half.
 
@@ -56,11 +56,11 @@ The two internships already show engineering rigour. RetailPulse is what proves 
 
 ### Data at a glance
 
-| #   | Dataset                                          | Where to get it                                                                                                                                   | Licence         | Role                                                                       |
-| --- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------- |
-| 1   | **Brazilian E-Commerce Public Dataset by Olist** | Kaggle `olistbr/brazilian-ecommerce` (https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce). Mirror: github.com/olist/work-at-olist-data | CC BY-NC-SA 4.0 | **Core (Phases 1–6).** 9 relational tables, 99,441 orders (2016–2018)      |
-| 2   | Marketing Funnel by Olist                        | Kaggle `olistbr/marketing-funnel-olist`                                                                                                           | CC BY-NC-SA 4.0 | **Stretch only** (§12.1). 8,000 seller leads, 842 closed deals             |
-| 3   | Brazilian Cities (IBGE)                          | Kaggle `crisparada/brazilian-cities`                                                                                                              | CC BY-SA 4.0    | **Stretch only** (§12.2). State population and GDP for per-capita metrics  |
+| #   | Dataset                                          | Where to get it                                                                                                                                 | Licence         | Role                                                                      |
+| --- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------- |
+| 1   | **Brazilian E-Commerce Public Dataset by Olist** | Kaggle `olistbr/brazilian-ecommerce` (https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce). Mirror: github.com/olist/work-at-olist-data | CC BY-NC-SA 4.0 | **Core (Phases 1–6).** 9 relational tables, 99,441 orders (2016–2018)     |
+| 2   | Marketing Funnel by Olist                        | Kaggle `olistbr/marketing-funnel-olist`                                                                                                         | CC BY-NC-SA 4.0 | **Stretch only** (§12.1). 8,000 seller leads, 842 closed deals            |
+| 3   | Brazilian Cities (IBGE)                          | Kaggle `crisparada/brazilian-cities`                                                                                                            | CC BY-SA 4.0    | **Stretch only** (§12.2). State population and GDP for per-capita metrics |
 
 Download: `kaggle datasets download -d <ref> -p data/raw --unzip` (needs `kaggle.json` in `%USERPROFILE%\.kaggle\`). Fallback for dataset 1, no token needed: `https://raw.githubusercontent.com/olist/work-at-olist-data/master/datasets/<file>.csv`.
 
@@ -86,35 +86,35 @@ Download: `kaggle datasets download -d <ref> -p data/raw --unzip` (needs `kaggle
 
 **Sanity-check values** (computed 2026-10-07, pandas). Recompute and report **your** numbers; these only tell you when something is off.
 
-| Metric                                         |                                                             Value | Definition used                                                                                                                                                         |
-| ---------------------------------------------- | ----------------------------------------------------------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Late-delivery share                            |                                            6.77% (6,534 / 96,470) | delivered orders with a delivered date; late = `delivered_date::date > estimated_date::date`                                                                            |
-| 1-star review rate, late vs on time            |                         53.8% vs 6.6% (**8.1x**; odds ratio ≈ 16) | latest review per order                                                                                                                                                 |
-| Mean review score, late vs on time             |                                                      2.27 vs 4.29 | same                                                                                                                                                                    |
-| Repeat-purchase rate                           |                                   3.0% (2,801 / 93,350 customers) | `customer_unique_id` with ≥2 delivered orders                                                                                                                           |
-| Average month-1 cohort retention               |                                                            ≈0.46% | cohorts with ≥500 customers                                                                                                                                             |
-| GMV (item price, delivered)                    |                                                           R$13.2M | excludes freight                                                                                                                                                        |
-| AOV (item price)                               |                                                            ≈R$137 | per order                                                                                                                                                               |
-| Freight share of (price + freight)             |                                14.2% overall; SP 12.2% → RR 22.2% | by customer state                                                                                                                                                       |
-| Late share by state                            |                           SP 4.5% vs AL 21.4%, MA 17.4%, SE 15.2% |                                                                                                                                                                         |
-| Median actual vs promised delivery time        |                                                 10.2 vs 23.2 days | estimates are padded, yet 6.8% still arrive late                                                                                                                        |
-| Category Pareto                                |                          17 of 73 categories make 80% of item GMV | all items, Portuguese names, **null category excluded**. With the null group kept it's 18 of 74. Pick one and state it.                                                 |
-| Seller Pareto                                  |                 544 of 3,095 sellers (17.6%) make 80% of item GMV |                                                                                                                                                                         |
-| Worst-decile sellers by late rate (≥20 orders) | 82 sellers: 5.3% of seller-orders but 13.3% of late seller-orders |                                                                                                                                                                         |
-| YoY order growth, Jan–Aug                      |                              22,968 (2017) → 53,991 (2018), +135% |                                                                                                                                                                         |
+| Metric                                         |                                                             Value | Definition used                                                                                                         |
+| ---------------------------------------------- | ----------------------------------------------------------------: | ----------------------------------------------------------------------------------------------------------------------- |
+| Late-delivery share                            |                                            6.77% (6,534 / 96,470) | delivered orders with a delivered date; late = `delivered_date::date > estimated_date::date`                            |
+| 1-star review rate, late vs on time            |                         53.8% vs 6.6% (**8.1x**; odds ratio ≈ 16) | latest review per order                                                                                                 |
+| Mean review score, late vs on time             |                                                      2.27 vs 4.29 | same                                                                                                                    |
+| Repeat-purchase rate                           |                                   3.0% (2,801 / 93,350 customers) | `customer_unique_id` with ≥2 delivered orders                                                                           |
+| Average month-1 cohort retention               |                                                            ≈0.46% | cohorts with ≥500 customers                                                                                             |
+| GMV (item price, delivered)                    |                                                           R$13.2M | excludes freight                                                                                                        |
+| AOV (item price)                               |                                                            ≈R$137 | per order                                                                                                               |
+| Freight share of (price + freight)             |                                14.2% overall; SP 12.2% → RR 22.2% | by customer state                                                                                                       |
+| Late share by state                            |                           SP 4.5% vs AL 21.4%, MA 17.4%, SE 15.2% |                                                                                                                         |
+| Median actual vs promised delivery time        |                                                 10.2 vs 23.2 days | estimates are padded, yet 6.8% still arrive late                                                                        |
+| Category Pareto                                |                          17 of 73 categories make 80% of item GMV | all items, Portuguese names, **null category excluded**. With the null group kept it's 18 of 74. Pick one and state it. |
+| Seller Pareto                                  |                 544 of 3,095 sellers (17.6%) make 80% of item GMV |                                                                                                                         |
+| Worst-decile sellers by late rate (≥20 orders) | 82 sellers: 5.3% of seller-orders but 13.3% of late seller-orders |                                                                                                                         |
+| YoY order growth, Jan–Aug                      |                              22,968 (2017) → 53,991 (2018), +135% |                                                                                                                         |
 
 ## 4. Tech stack
 
-| Layer                    | Tool                                                                              | Notes for Windows                                                                                      |
-| ------------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Warehouse                | PostgreSQL 16+ (EDB installer, includes pgAdmin)                                  | Power BI and Excel both connect natively                                                               |
-| Transform + tests + docs | dbt Core + `dbt-postgres`, package `dbt_utils`                                    | `dbt docs generate` gives the lineage graph                                                            |
-| Load                     | `psql \copy` via `scripts/load_raw.ps1`                                           | Faster and more transparent than pandas `to_sql`                                                       |
-| Analysis                 | Python 3.12: pandas, NumPy, SciPy, statsmodels, scikit-learn, Matplotlib, Seaborn, Jupyter | statsmodels gives proper p-values, CIs and marginal effects                                   |
-| Code quality             | `ruff` (lint), `pytest` (loader + sanity-number tests), `nbconvert` (execute notebooks headless) | Run at the end of every phase                                                           |
-| BI                       | Power BI Desktop (free)                                                           | Import mode from Postgres. Ship `.pbix`, PDF export, screenshots                                       |
-| Spreadsheet              | Excel (college M365) with Power Query                                             | Seller scorecard workbook                                                                              |
-| Version control          | Git + GitHub (`SudevOP1/RetailPulse`)                                             | `.gitignore` raw data, `.env`, `profiles.yml`, `dbt/target/`                                           |
+| Layer                    | Tool                                                                                             | Notes for Windows                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Warehouse                | PostgreSQL 16+ (EDB installer, includes pgAdmin)                                                 | Power BI and Excel both connect natively                         |
+| Transform + tests + docs | dbt Core + `dbt-postgres`, package `dbt_utils`                                                   | `dbt docs generate` gives the lineage graph                      |
+| Load                     | `psql \copy` via `scripts/load_raw.ps1`                                                          | Faster and more transparent than pandas `to_sql`                 |
+| Analysis                 | Python 3.12: pandas, NumPy, SciPy, statsmodels, scikit-learn, Matplotlib, Seaborn, Jupyter       | statsmodels gives proper p-values, CIs and marginal effects      |
+| Code quality             | `ruff` (lint), `pytest` (loader + sanity-number tests), `nbconvert` (execute notebooks headless) | Run at the end of every phase                                    |
+| BI                       | Power BI Desktop (free)                                                                          | Import mode from Postgres. Ship `.pbix`, PDF export, screenshots |
+| Spreadsheet              | Excel (college M365) with Power Query                                                            | Seller scorecard workbook                                        |
+| Version control          | Git + GitHub (`SudevOP1/RetailPulse`)                                                            | `.gitignore` raw data, `.env`, `profiles.yml`, `dbt/target/`     |
 
 ## 5. Architecture
 
@@ -178,14 +178,14 @@ RetailPulse/
 
 ## 7. Phase overview
 
-| Phase | Name                                         | Sessions (~3h) | Cumulative | Resume bullet | Done when                                                                                  |
-| ----- | -------------------------------------------- | -------------: | ---------: | ------------- | ------------------------------------------------------------------------------------------ |
-| 1     | Setup, ingest, profile                       |            1.5 |        1.5 | 1             | `dbt debug` passes; 9 raw tables loaded, counts match §3a; EDA part 1 + DQ log started     |
-| 2     | dbt star schema + 25+ data-quality tests     |              3 |        4.5 | 1             | 2 fact + 4 dim tables; `dbt build` ERROR=0 with ≥25 tests, dup-review test WARNs; lineage  |
-| 3     | SQL analytics marts                          |              2 |        6.5 | 3             | 6 analytics models; 3% repeat rate and 17/73 Pareto reproduced; sanity tests pass          |
-| 4     | Statistics: late delivery + A/B sizing       |              2 |        8.5 | 2             | z-test, logit with AME, power analysis written up; 6.8% / 54% vs 7% / 8x reproduced        |
-| 5     | Power BI dashboard + Excel scorecard         |            3.5 |         12 | 4             | 4 pages, 15 measures, drill-through works; xlsx refreshes cleanly                          |
-| 6     | KPI dictionary, insight memo, README, polish |              3 |         15 | 4             | memo fits 1 page with 4 quantified recs; §13 checklist ticked; resume numbers finalised    |
+| Phase | Name                                         | Sessions (~3h) | Cumulative | Resume bullet | Done when                                                                                 |
+| ----- | -------------------------------------------- | -------------: | ---------: | ------------- | ----------------------------------------------------------------------------------------- |
+| 1     | Setup, ingest, profile                       |            1.5 |        1.5 | 1             | `dbt debug` passes; 9 raw tables loaded, counts match §3a; EDA part 1 + DQ log started    |
+| 2     | dbt star schema + 25+ data-quality tests     |              3 |        4.5 | 1             | 2 fact + 4 dim tables; `dbt build` ERROR=0 with ≥25 tests, dup-review test WARNs; lineage |
+| 3     | SQL analytics marts                          |              2 |        6.5 | 3             | 6 analytics models; 3% repeat rate and 17/73 Pareto reproduced; sanity tests pass         |
+| 4     | Statistics: late delivery + A/B sizing       |              2 |        8.5 | 2             | z-test, logit with AME, power analysis written up; 6.8% / 54% vs 7% / 8x reproduced       |
+| 5     | Power BI dashboard + Excel scorecard         |            3.5 |         12 | 4             | 4 pages, 15 measures, drill-through works; xlsx refreshes cleanly                         |
+| 6     | KPI dictionary, insight memo, README, polish |              3 |         15 | 4             | memo fits 1 page with 4 quantified recs; §13 checklist ticked; resume numbers finalised   |
 
 Week 1 = Phases 1–3, week 2 = Phases 4–5, week 3 = Phase 6 (+ stretch if time). If time runs short, cut the Excel scorecard's Lookup sheet first, then the A/A simulation. **Never cut** the dbt tests, the stats notebook or the memo; they carry the resume claims.
 
@@ -255,29 +255,29 @@ Materialization: staging = view, intermediate = view (or ephemeral), marts = tab
 
 **The 30 dbt tests** (resume says "25+"; count them in the `dbt build` summary):
 
-| #     | Model.column                                                     | Test                                                                                                                       |
-| ----- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 1–2   | source orders.order_id                                           | unique, not_null                                                                                                           |
-| 3–4   | stg_olist\_\_orders.order_id                                     | unique, not_null                                                                                                           |
-| 5     | stg_olist\_\_orders.order_status                                 | accepted_values (8 statuses)                                                                                               |
-| 6–7   | stg_olist\_\_customers.customer_id                               | unique, not_null                                                                                                           |
-| 8     | stg_olist\_\_order_items                                         | `dbt_utils.unique_combination_of_columns` (order_id, order_item_id)                                                        |
-| 9–10  | stg_olist\_\_order_items.price / freight_value                   | `dbt_utils.accepted_range` min 0                                                                                           |
-| 11–12 | stg_olist\_\_order_items.product_id / seller_id                  | relationships → products / sellers                                                                                         |
-| 13    | stg_olist\_\_payments.payment_type                               | accepted_values (5)                                                                                                        |
-| 14    | stg_olist\_\_reviews.review_score                                | accepted_values [1,2,3,4,5]                                                                                                |
+| #     | Model.column                                                     | Test                                                                                                                                      |
+| ----- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 1–2   | source orders.order_id                                           | unique, not_null                                                                                                                          |
+| 3–4   | stg_olist\_\_orders.order_id                                     | unique, not_null                                                                                                                          |
+| 5     | stg_olist\_\_orders.order_status                                 | accepted_values (8 statuses)                                                                                                              |
+| 6–7   | stg_olist\_\_customers.customer_id                               | unique, not_null                                                                                                                          |
+| 8     | stg_olist\_\_order_items                                         | `dbt_utils.unique_combination_of_columns` (order_id, order_item_id)                                                                       |
+| 9–10  | stg_olist\_\_order_items.price / freight_value                   | `dbt_utils.accepted_range` min 0                                                                                                          |
+| 11–12 | stg_olist\_\_order_items.product_id / seller_id                  | relationships → products / sellers                                                                                                        |
+| 13    | stg_olist\_\_payments.payment_type                               | accepted_values (5)                                                                                                                       |
+| 14    | stg_olist\_\_reviews.review_score                                | accepted_values [1,2,3,4,5]                                                                                                               |
 | 15    | stg_olist\_\_reviews.review_id                                   | **unique, `severity: warn`, `store_failures: true`**. _Expected_ to flag the 814 duplicate rows: the resume's "flagged duplicate reviews" |
-| 16    | stg_olist\_\_reviews                                             | unique_combination (review_id, order_id)                                                                                   |
-| 17–18 | stg_olist\_\_products.product_id, stg_olist\_\_sellers.seller_id | unique                                                                                                                     |
-| 19–20 | fact_orders.order_id                                             | unique, not_null                                                                                                           |
-| 21–22 | fact_orders.customer_key / purchase_date_key                     | relationships → dim_customer / dim_date                                                                                    |
-| 23    | fact_order_items                                                 | unique_combination (order_id, order_item_id)                                                                               |
-| 24–25 | fact_order_items.product_key / seller_key                        | relationships → dim_product / dim_seller                                                                                   |
-| 26    | dim_customer.customer_key                                        | unique                                                                                                                     |
-| 27    | dim_product.category_en                                          | not_null (fails before the translation patch, passes after: documents the fix)                                             |
-| 28    | dim_date.date_key                                                | unique                                                                                                                     |
-| 29    | singular `assert_delivered_after_purchase`                       | delivered_at ≥ purchased_at for delivered orders                                                                           |
-| 30    | singular `assert_payments_match_items`                           | `abs(payment_value − order_value) > 1.0` on < 1% of orders (`severity: warn`)                                              |
+| 16    | stg_olist\_\_reviews                                             | unique_combination (review_id, order_id)                                                                                                  |
+| 17–18 | stg_olist\_\_products.product_id, stg_olist\_\_sellers.seller_id | unique                                                                                                                                    |
+| 19–20 | fact_orders.order_id                                             | unique, not_null                                                                                                                          |
+| 21–22 | fact_orders.customer_key / purchase_date_key                     | relationships → dim_customer / dim_date                                                                                                   |
+| 23    | fact_order_items                                                 | unique_combination (order_id, order_item_id)                                                                                              |
+| 24–25 | fact_order_items.product_key / seller_key                        | relationships → dim_product / dim_seller                                                                                                  |
+| 26    | dim_customer.customer_key                                        | unique                                                                                                                                    |
+| 27    | dim_product.category_en                                          | not_null (fails before the translation patch, passes after: documents the fix)                                                            |
+| 28    | dim_date.date_key                                                | unique                                                                                                                                    |
+| 29    | singular `assert_delivered_after_purchase`                       | delivered_at ≥ purchased_at for delivered orders                                                                                          |
+| 30    | singular `assert_payments_match_items`                           | `abs(payment_value − order_value) > 1.0` on < 1% of orders (`severity: warn`)                                                             |
 
 **Docs.** `description:` for every mart model and column in `_core.yml`. `dbt docs generate` → user screenshots the lineage graph to `docs/dbt_lineage.png`. ERD (dbdiagram.io) → `docs/erd.png` (Claude writes the DBML in `docs/erd.dbml`).
 
@@ -441,19 +441,19 @@ Put the impact arithmetic in a small notebook cell or `scripts/memo_numbers.py` 
 
 ## 9. How each resume number is measured and reported honestly
 
-| Resume claim                                    | Phase | Type         | How to measure                                                                                                     | Evidence                            |
-| ----------------------------------------------- | ----- | ------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
-| 100K orders, 9 raw tables                       | 1     | Dataset fact | `select count(*) from raw.orders` = 99,441; 9 sources in `_sources.yml`                                            | `01_eda.ipynb`, `test_raw_counts`   |
-| 2 fact, 4 dimension tables                      | 2     | Design fact  | `marts/core` folder                                                                                                | dbt lineage PNG                     |
-| 25+ data-quality tests                          | 2     | Design fact  | `dbt build` summary ("PASS=… WARN=… ERROR=0"), 30 planned                                                          | README screenshot                   |
-| tests flagged duplicate reviews                 | 2     | Dataset+design | test #15 warns with 814 failures, stored in `dbt_test__audit`                                                    | `docs/data_quality_log.md`          |
-| late deliveries 6.8% of orders                  | 4     | **VERIFY**   | definition in §3a (share of delivered orders with a delivered date)                                                | `02_late_delivery_stats.ipynb`      |
-| 8x higher 1-star rate (54% vs 7%)               | 4     | **VERIFY**   | ratio of proportions, with z-test and logit AME alongside                                                          | same                                |
-| sized an A/B test via power analysis            | 4     | Design       | `NormalIndPower` output                                                                                            | `03_ab_test_design.ipynb`           |
-| 3% repeat-purchase rate                         | 3     | **VERIFY**   | `customer_unique_id` with ≥2 delivered orders / all with ≥1                                                        | `kpi_monthly` / DAX measure #7      |
-| 17 of 73 categories → 80% of revenue            | 3     | **VERIFY**   | `category_pareto` rows with `cum_share <= 0.8` + 1; null-category choice can shift by 1. Report what you get.      | `category_pareto`                   |
-| 4-page Power BI, 15 DAX measures, drill-through | 5     | Design fact  | count pages/measures in the `.pbix`                                                                                | screenshots, `dax_measures.md`      |
-| KPI dictionary + 1-page memo, 4 recommendations | 6     | Design fact  | docs folder                                                                                                        | `docs/`                             |
+| Resume claim                                    | Phase | Type           | How to measure                                                                                                | Evidence                          |
+| ----------------------------------------------- | ----- | -------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| 100K orders, 9 raw tables                       | 1     | Dataset fact   | `select count(*) from raw.orders` = 99,441; 9 sources in `_sources.yml`                                       | `01_eda.ipynb`, `test_raw_counts` |
+| 2 fact, 4 dimension tables                      | 2     | Design fact    | `marts/core` folder                                                                                           | dbt lineage PNG                   |
+| 25+ data-quality tests                          | 2     | Design fact    | `dbt build` summary ("PASS=… WARN=… ERROR=0"), 30 planned                                                     | README screenshot                 |
+| tests flagged duplicate reviews                 | 2     | Dataset+design | test #15 warns with 814 failures, stored in `dbt_test__audit`                                                 | `docs/data_quality_log.md`        |
+| late deliveries 6.8% of orders                  | 4     | **VERIFY**     | definition in §3a (share of delivered orders with a delivered date)                                           | `02_late_delivery_stats.ipynb`    |
+| 8x higher 1-star rate (54% vs 7%)               | 4     | **VERIFY**     | ratio of proportions, with z-test and logit AME alongside                                                     | same                              |
+| sized an A/B test via power analysis            | 4     | Design         | `NormalIndPower` output                                                                                       | `03_ab_test_design.ipynb`         |
+| 3% repeat-purchase rate                         | 3     | **VERIFY**     | `customer_unique_id` with ≥2 delivered orders / all with ≥1                                                   | `kpi_monthly` / DAX measure #7    |
+| 17 of 73 categories → 80% of revenue            | 3     | **VERIFY**     | `category_pareto` rows with `cum_share <= 0.8` + 1; null-category choice can shift by 1. Report what you get. | `category_pareto`                 |
+| 4-page Power BI, 15 DAX measures, drill-through | 5     | Design fact    | count pages/measures in the `.pbix`                                                                           | screenshots, `dax_measures.md`    |
+| KPI dictionary + 1-page memo, 4 recommendations | 6     | Design fact    | docs folder                                                                                                   | `docs/`                           |
 
 Rule: if any number differs from the resume, **update the resume to your number**, never the other way round.
 
@@ -481,20 +481,20 @@ Alternative bullet for BA-heavy JDs (swap with bullet 3): "Identified 82 sellers
 2. "Headline: late deliveries are only about 7% of orders but carry an 8x higher 1-star rate. Lateness can't be randomized, so I designed an A/B test of a mitigation and sized it at about 3 months of traffic."
 3. "The data had traps: customer_id is per order, reviews are duplicated, 2 categories are untranslated, and the date range edges are truncated. dbt tests caught them and the DQ log records each decision."
 
-| Question | A good answer covers |
-|---|---|
-| Why a star schema rather than one wide table? | Declared grain per fact, conformed dims shared across facts, smaller/faster BI models, simpler DAX. Name your grains exactly. |
-| Why dbt? | SQL-first transforms in version control, tests as code, lineage/docs, ref-based DAG. Mention the test that intentionally warns. |
-| How did you define "late"? Never-delivered orders? | Date-level comparison, delivered orders only, survivorship bias acknowledged, sensitivity check with `days_late > 1`. |
-| Does lateness _cause_ 1-star reviews? | Observational. Controls + dose-response support the link, but residual confounding remains. Test a mitigation instead. |
-| Odds ratio 16 but risk ratio 8: why? | Odds diverge from probabilities when the outcome isn't rare (54%). Business audiences get risk ratios and marginal effects. |
-| Why Mann–Whitney, not a t-test, on review score? | 1–5 is ordinal and heavily skewed (58% 5-star). |
-| Walk me through your cohort query. | `MIN() OVER (PARTITION BY customer)` → cohort month, month index, `COUNT(DISTINCT)`, `FIRST_VALUE` for size. Why `customer_unique_id`. |
+| Question                                             | A good answer covers                                                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Why a star schema rather than one wide table?        | Declared grain per fact, conformed dims shared across facts, smaller/faster BI models, simpler DAX. Name your grains exactly.               |
+| Why dbt?                                             | SQL-first transforms in version control, tests as code, lineage/docs, ref-based DAG. Mention the test that intentionally warns.             |
+| How did you define "late"? Never-delivered orders?   | Date-level comparison, delivered orders only, survivorship bias acknowledged, sensitivity check with `days_late > 1`.                       |
+| Does lateness _cause_ 1-star reviews?                | Observational. Controls + dose-response support the link, but residual confounding remains. Test a mitigation instead.                      |
+| Odds ratio 16 but risk ratio 8: why?                 | Odds diverge from probabilities when the outcome isn't rare (54%). Business audiences get risk ratios and marginal effects.                 |
+| Why Mann–Whitney, not a t-test, on review score?     | 1–5 is ordinal and heavily skewed (58% 5-star).                                                                                             |
+| Walk me through your cohort query.                   | `MIN() OVER (PARTITION BY customer)` → cohort month, month index, `COUNT(DISTINCT)`, `FIRST_VALUE` for size. Why `customer_unique_id`.      |
 | Month-1 retention ≈0.5%. Is cohort analysis useless? | No, that's the finding: mostly one-off purchases, so the levers are acquisition and the first-to-second purchase. Also why RFM F is a flag. |
-| Explain CALCULATE / filter context. | Modifies filter context; row vs filter context; why DIVIDE; DATEADD needs a contiguous marked date table. |
-| How would you size the A/B test, what can go wrong? | Baseline, MDE, α, power → n per arm; run-rate → duration. SRM, peeking, novelty, guardrails, randomization unit. |
-| 30 seconds with the Head of Ops? | The memo's top line: number, action, expected impact. |
-| More time? | Delay prediction model, Portuguese review NLP, seller funnel (§12), incremental dbt + CI. |
+| Explain CALCULATE / filter context.                  | Modifies filter context; row vs filter context; why DIVIDE; DATEADD needs a contiguous marked date table.                                   |
+| How would you size the A/B test, what can go wrong?  | Baseline, MDE, α, power → n per arm; run-rate → duration. SRM, peeking, novelty, guardrails, randomization unit.                            |
+| 30 seconds with the Head of Ops?                     | The memo's top line: number, action, expected impact.                                                                                       |
+| More time?                                           | Delay prediction model, Portuguese review NLP, seller funnel (§12), incremental dbt + CI.                                                   |
 
 ## 12. Stretch goals (only after Phase 6; not on the resume)
 
@@ -502,7 +502,7 @@ Alternative bullet for BA-heavy JDs (swap with bullet 3): "Identified 82 sellers
 
 8,000 MQLs (`olist_marketing_qualified_leads_dataset.csv`) and 842 closed deals (`olist_closed_deals_dataset.csv`), joined to the core data on `seller_id`. Sanity checks (2026-10-07): lead → won 10.5%; by origin unknown 16.3%, paid_search 12.3%, organic_search 11.8%, email 3.0%; median 14 days to win; 380 of 842 won sellers ever sold (R$676,851 item GMV).
 
-Work: load to `raw.mqls` / `raw.closed_deals`; `stg_funnel__*`; tests (unique `mql_id`, relationship closed_deals → mqls, warn-level relationship to `dim_seller` that's _expected_ to warn); `seller_funnel` (1 row/MQL) and `funnel_by_origin` marts; `04_seller_funnel.ipynb` with Wilson CIs, chi-square origin × won, paid_search vs email z-test, GMV per lead. Traps: right-censoring (use deals won ≤ 2018-06-30 and "sold within 60 days"), the 8,000 are a sample, "unknown" converting best is a tracking finding, 90%-null columns aren't modelled.
+Work: load to `raw.mqls` / `raw.closed_deals`; `stg_funnel__*`; tests (unique `mql_id`, relationship closed*deals → mqls, warn-level relationship to `dim_seller` that's \_expected* to warn); `seller_funnel` (1 row/MQL) and `funnel_by_origin` marts; `04_seller_funnel.ipynb` with Wilson CIs, chi-square origin × won, paid_search vs email z-test, GMV per lead. Traps: right-censoring (use deals won ≤ 2018-06-30 and "sold within 60 days"), the 8,000 are a sample, "unknown" converting best is a tracking finding, 90%-null columns aren't modelled.
 
 Resume bullet if done (swap with bullet 3): "Traced Olist's seller-acquisition funnel (8,000 leads → 842 deals → 380 active sellers) by joining a second Kaggle dataset on seller_id, finding a 10.5% lead-to-deal rate and a ~4x win-rate gap between paid search and email (chi-square, Wilson CIs)." (VERIFY.)
 

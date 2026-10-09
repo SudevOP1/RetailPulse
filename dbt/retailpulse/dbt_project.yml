@@ -1,0 +1,24 @@
+name: retailpulse
+version: "1.0.0"
+config-version: 2
+
+profile: retailpulse
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+# Layering (PLAN.md §8 Phase 2): staging/intermediate are views, marts are tables.
+models:
+  retailpulse:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table
