@@ -17,7 +17,7 @@ E-commerce analytics from end to end on the Olist Brazilian marketplace data: wa
 | 1     | Setup, ingest, profile                       | 1                    | Done                                                  | 2026-10-09 |
 | 2     | dbt star schema + 25+ data-quality tests     | 1                    | Done                                                  | 2026-10-09 |
 | 3     | SQL analytics marts                          | 3                    | Done                                                  | 2026-10-09 |
-| 4     | Statistics: late delivery + A/B sizing       | 2                    | Not started                                           | –          |
+| 4     | Statistics: late delivery + A/B sizing       | 2                    | Done                                                  | 2026-10-09 |
 | 5     | Power BI dashboard + Excel scorecard         | 4                    | Not started                                           | –          |
 | 6     | KPI dictionary, insight memo, README, polish | 4                    | Not started                                           | –          |
 
@@ -351,11 +351,12 @@ Each is a dbt model in `marts/analytics/` with `not_null`/`unique` tests on keys
 - Hypothesis: proactively notifying customers whose orders are predicted late (+ small voucher) lowers the 1-star rate among late orders.
 - Unit: randomize at `customer_unique_id`. Primary metric: 1-star rate among late orders. Guardrails: voucher cost per order, refund rate.
 - **Power analysis:** `NormalIndPower().solve_power(effect_size=proportion_effectsize(0.54, 0.49), alpha=0.05, power=0.8)` ≈ **784 late orders per arm** (5 pp MDE). At ~510 late orders/month (2018 run-rate) ≈ **3 months**; an 8 pp MDE needs ≈306/arm (~1.2 months). Show an MDE-vs-duration table and recommend one.
+  > **Corrected in Phase 4 (2026-10-09):** 784 / 306 were half the right values. `nobs1` is per arm and equals 2(z₁₋α/₂+z₁₋β)²/h² ≈ **1,567/arm** for 5 pp (≈ 6.3 months at ~499 late reviewed orders/month) and **612/arm** for 8 pp (≈ 2.5 months, the recommended design). See `03_ab_test_design.ipynb`.
 - **A/A simulation:** 1,000 null experiments → false-positive rate ≈ 5%. One paragraph each on sample-ratio mismatch and peeking.
 
 **`01_eda.ipynb` part 2:** memo-ready charts with a consistent Seaborn style, saved to `docs/img/`.
 
-Put reusable helpers (bucketing, power table) in `scripts/stats_helpers.py` so `tests/test_stats.py` can check them (e.g. power for 0.54 vs 0.49 ≈ 784 ± 5).
+Put reusable helpers (bucketing, power table) in `scripts/stats_helpers.py` so `tests/test_stats.py` can check them (e.g. power for 0.54 vs 0.49 ≈ 784 ± 5; corrected to ≈ 1,567 ± 5 in Phase 4).
 
 **Verification.** All 3 notebooks execute headless (`jupyter nbconvert --execute`); `pytest`; `ruff check .`. Record late share, 1-star rates, ratio, AME, n per arm in `PROGRESS.md`.
 
@@ -425,7 +426,7 @@ Put reusable helpers (bucketing, power table) in `scripts/stats_helpers.py` so `
 
 **`docs/insight_memo.md` → `insight_memo.pdf`, strictly 1 page.** Context (2 lines), 3–4 key findings with numbers, **4 recommendations**, next steps. Each rec: action, evidence, impact estimate with assumptions, how to measure. Use your own numbers:
 
-1. **Proactive delay communication + voucher** for predicted-late orders. Evidence: 8x 1-star rate. Measure with the Phase 4 A/B design (~784 late orders/arm).
+1. **Proactive delay communication + voucher** for predicted-late orders. Evidence: 8x 1-star rate. Measure with the Phase 4 A/B design (612 late orders/arm at an 8 pp MDE, ≈ 2.5 months; 5 pp would need 1,567/arm ≈ 6 months).
 2. **Seller SLA programme** for the worst late-rate decile. Evidence: 82 sellers = 13.3% of late seller-orders, 5.3% of volume. Impact: if they matched the median late rate, marketplace late % drops by X pp (compute).
 3. **Regional carrier / estimate review for the Northeast.** Evidence: AL 21%, MA 17% late vs SP 4.5%, despite 2x padded promises.
 4. **Second-purchase campaign** for "New high-value" RFM customers. Evidence: 3% repeat rate. Impact: each +1 pp of repeat ≈ N orders × AOV ≈ R$X GMV/yr (show arithmetic).
@@ -478,7 +479,7 @@ Alternative bullet for BA-heavy JDs (swap with bullet 3): "Identified 82 sellers
 **Talking points (2 minutes)**
 
 1. "I treated it like Olist's own analyst take-home: ELT into Postgres, dbt for tested models, then three consumers: SQL marts, a stats notebook and Power BI."
-2. "Headline: late deliveries are only about 7% of orders but carry an 8x higher 1-star rate. Lateness can't be randomized, so I designed an A/B test of a mitigation and sized it at about 3 months of traffic."
+2. "Headline: late deliveries are only about 7% of orders but carry an 8x higher 1-star rate. Lateness can't be randomized, so I designed an A/B test of a mitigation and sized it at about 2.5 months of traffic for an 8-point drop."
 3. "The data had traps: customer_id is per order, reviews are duplicated, 2 categories are untranslated, and the date range edges are truncated. dbt tests caught them and the DQ log records each decision."
 
 | Question                                             | A good answer covers                                                                                                                        |
